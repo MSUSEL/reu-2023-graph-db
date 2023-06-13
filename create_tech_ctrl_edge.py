@@ -20,14 +20,14 @@ with open("nist800-53-r5-mappings2.json", 'r') as file:
         graph.delete_edge_definition(TECH_CONT)
         db.delete_collection(TECH_CONT)
     
-    # creates the edge
+    # creates an edge in the graph
     graph.create_edge_definition(
                 edge_collection = TECH_CONT,
                 from_vertex_collections = ['technique'],
                 to_vertex_collections = ['control'])
 
     # gets the edge collection
-    TC = graph.edge_collection(TECH_CONT)
+    tc = graph.edge_collection(TECH_CONT)
 
     # gets the collections
     control = db.collection('control')
@@ -68,4 +68,4 @@ with open("nist800-53-r5-mappings2.json", 'r') as file:
 
         # inserts the edge data
         edge_data = {'_from': tech_id, '_to': control_id}
-        TC.insert(edge_data)
+        tc.insert(edge_data)
