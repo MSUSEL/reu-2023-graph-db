@@ -1,8 +1,9 @@
 from arango import ArangoClient
+from driver import db
 
-# access to the arango database
-client = ArangoClient()
-db = client.db('BRON', username='root', password='changeme')
+# # access to the arango database
+# client = ArangoClient()
+# db = client.db('BRON', username='root', password='changeme')
 
 # constant indicates a name of edge collection will be create
 TAC_TAC = 'TacticTactic'
@@ -13,7 +14,7 @@ graph = db.graph('BRONGraph')
 # delete edge in the graph and edge collection if they exist
 if graph.has_edge_definition(TAC_TAC):
     graph.delete_edge_definition(TAC_TAC)
-if graph.has_edge_collection(TAC_TAC):
+if db.has_collection(TAC_TAC):
     db.delete_collection(TAC_TAC)
 
 # creates an edge in the graph

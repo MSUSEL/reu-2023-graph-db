@@ -1,13 +1,15 @@
 # import ArangoClient for use
 from arango import ArangoClient
 
+from driver import db
+
 # setting guest database and local database
 guest = ArangoClient(hosts='http://bron.alfa.csail.mit.edu:8529')
-client = ArangoClient()
+#client = ArangoClient()
 
 # opening guest database and local database
 guest_db = guest.db('BRON', username='guest', password='guest')
-db = client.db('BRON', username='root', password='changeme')
+#db = client.db('BRON', username='root', password='changeme')
 
 # opening guest db document for transfer
 guest_collection = guest_db.collection('TechniqueCapec')
