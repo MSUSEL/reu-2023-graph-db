@@ -1,7 +1,4 @@
-# import ArangoClient for use
-from arango import ArangoClient
-
-from driver import db
+from driver import db, ArangoClient
 
 # setting guest database and local database
 guest = ArangoClient(hosts='http://bron.alfa.csail.mit.edu:8529')

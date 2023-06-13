@@ -10,8 +10,8 @@ with open("nist800-53-r5-mappings2.json", 'r') as file:
     data = json.load(file)
 
     # execute files
-    print("Inserting TechniqueCapac edge collection...")
     exec(open('get_json_from_db.py').read())
+    print("Successfully inserted TechniqueCapac edge collection.")
     print("Inserting Control collection...")
     exec(open('insert_control_data.py').read())
     print("Inserting TechniqueControl edge collection...")
