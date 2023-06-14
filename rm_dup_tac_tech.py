@@ -1,4 +1,4 @@
-# This script remove the duplicate data in TacticTechinique Collection
+# This script remove the duplicate data in TacticTechinique Edge Collection
 
 def remove_duplicates(db):
     # query that removes all duplicate data

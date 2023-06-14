@@ -19,6 +19,6 @@ with open("nist800-53-r5-mappings2.json", 'r') as file:
     insert_tech_ctrl_edge.create_edge(db, data)
     print("Inserting TacticTactic Collection...")
     insert_tactic_path.create_edge(db)
-    print("Removing Duplicates in TacticTechnique Collection...")
+    print("Removing Duplicates in TacticTechnique Edge Collection...")
     rm_dup_tac_tech.remove_duplicates(db)
     print("Done")
