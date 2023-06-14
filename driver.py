@@ -1,5 +1,6 @@
 from arango import ArangoClient
 import json, get_json_from_db, insert_control_data, insert_tech_ctrl_edge, insert_tactic_path
+import rm_dup_tac_tech
 
 # access to the arango database
 client = ArangoClient()
@@ -10,14 +11,14 @@ with open("nist800-53-r5-mappings2.json", 'r') as file:
     data = json.load(file)
 
     # execute functions in other src files
-    print("Inserting TechniqueCapac edge collection...")
+    print("Inserting TechniqueCapac Edge Collection...")
     get_json_from_db.get_tech_capac(db)
     print("Inserting Control Collection...")
     insert_control_data.insert(db, data)
-    print("Inserting TechniqueControl edge collection...")
+    print("Inserting TechniqueControl Edge Collection...")
     insert_tech_ctrl_edge.create_edge(db, data)
-    # exec(open('create_tech_ctrl_edge.py').read())
     print("Inserting TacticTactic Collection...")
     insert_tactic_path.create_edge(db)
-    # exec(open('insert_tactic_path.py').read())
-    print("Finished Inserting")
+    print("Removing Duplicates in TacticTechnique Collection...")
+    rm_dup_tac_tech.remove_duplicates(db)
+    print("Done")
