@@ -1,5 +1,5 @@
 from arango import ArangoClient
-import json
+import json, get_json_from_db, insert_control_data, insert_tech_ctrl_edge, insert_tactic_path
 
 # access to the arango database
 client = ArangoClient()
@@ -9,13 +9,13 @@ db = client.db('BRON', username = 'root', password = 'changeme')
 with open("nist800-53-r5-mappings2.json", 'r') as file:
     data = json.load(file)
 
-    # execute files
+    # execute functions in other src files
     print("Inserting TechniqueCapac edge collection...")
-    exec(open('get_json_from_db.py').read())
-    print("Inserting Control collection...")
-    exec(open('insert_control_data.py').read())
+    get_json_from_db.get_tech_capac(db)
+    print("Inserting Control Collection...")
+    insert_control_data.insert(db, data)
     print("Inserting TechniqueControl edge collection...")
-    exec(open('create_tech_ctrl_edge.py').read())
-    print("Inserting TacticTactic collection...")
-    exec(open('insert_tactic_path.py').read())
-    print("End")
+    insert_tech_ctrl_edge.create_edge(db, data)
+    print("Inserting TacticTactic Collection...")
+    insert_tactic_path.create_edge(db)
+    print("Finished Inserting")
