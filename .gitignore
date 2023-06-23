@@ -1,5 +1,4 @@
-__pycache__/get_json_from_db.cpython-310.pyc
-__pycache__/insert_control_data.cpython-310.pyc
-__pycache__/insert_tactic_path.cpython-310.pyc
-__pycache__/insert_tech_ctrl_edge.cpython-310.pyc
-__pycache__/rm_dup_tac_tech.cpython-310.pyc
+*.pyc
+*.js
+*.html
+*.css
