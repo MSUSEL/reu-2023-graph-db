@@ -1,5 +1,4 @@
-# imports 
-from arango import ArangoClient
+# imports
 import networkx as nx
 from pyvis import network as net
 import webbrowser
@@ -8,7 +7,7 @@ import os
 # method to create web browser graph
 def make_graph(db, cursor):
     # setting up the graph
-    TacTac = db.collection('TacticTactic')
+    tac_tac = db.collection('TacticTactic')
     graph = nx.DiGraph()
     g = net.Network(height='100vh', width='100%', notebook=True)
 
@@ -26,7 +25,7 @@ def make_graph(db, cursor):
 
     # this is checking the BRON database for tactic to tactic 
     # paths that need to be placed into the networkx graph
-    for tt in TacTac:
+    for tt in tac_tac:
         if tt['_from'] in tactech_from_list and tt['_to'] in tactech_from_list:
             graph.add_edge(tt['_from'], tt['_to'])
 
@@ -34,6 +33,6 @@ def make_graph(db, cursor):
     g.from_nx(graph)
     # this is a list of sliders that can interact with the graph, adds things like wind and gravity
     #g.show_buttons(filter_=['physics'])
-    g.show('custom.html')
+    g.show('graph.html')
     # open the custom PyViz graph in the default web browser
-    webbrowser.open('file://' + os.path.abspath(os.getcwd()) + '/custom.html')
+    webbrowser.open('file://' + os.path.abspath(os.getcwd()) + '/graph.html')
