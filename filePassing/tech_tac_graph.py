@@ -2,7 +2,6 @@
 from arango import ArangoClient
 import networkx as nx
 from pyvis import network as net
-from IPython.core.display import display, HTML
 import webbrowser
 import os
 
