@@ -8,7 +8,7 @@ import os
 def make_graph(db, cursor):
     # setting up the graph
     tac_tac = db.collection('TacticTactic')
-    graph = nx.DiGraph()
+    graph = nx.Graph()
     g = net.Network(height='100vh', width='100%', notebook=True)
 
     # list for easy checking later
@@ -33,6 +33,46 @@ def make_graph(db, cursor):
     g.from_nx(graph)
     # this is a list of sliders that can interact with the graph, adds things like wind and gravity
     #g.show_buttons(filter_=['physics'])
-    g.show('graph.html')
-    # open the custom PyViz graph in the default web browser
-    webbrowser.open('file://' + os.path.abspath(os.getcwd()) + '/graph.html')
+
+    # NOTE: Temporary Commented Out
+    # g.show('graph.html')
+    # # open the custom PyViz graph in the default web browser
+    # webbrowser.open('file://' + os.path.abspath(os.getcwd()) + '/graph.html')
+
+    show_prioritize(graph)
+
+
+def sort_list(a_list):
+        return (sorted(a_list, key = lambda tup: tup[1], reverse=True)) # lambda arguments : expression
+
+def show_prioritize(graph):
+    # priority of tactic
+    high = []
+    mid = []
+    low = []
+    for node in graph.__iter__():
+        if 'tactic' in node:
+            #print(graph.__getitem__(node))
+            cnt_tac = 0
+            cnt_tech = 0
+            for neighbor in graph.neighbors(node):
+                if 'technique' in neighbor:
+                    cnt_tech += 1
+                else:
+                    print(node, neighbor)
+                    cnt_tac += 1
+            match cnt_tac:
+                case 0:
+                    low.append((node, cnt_tech))
+                case 1:
+                    mid.append((node, cnt_tech))
+                case _:
+                    high.append((node, cnt_tech))
+    
+    low = sort_list(low)
+    mid = sort_list(mid)
+    high = sort_list(high)
+    print('Low:', low, "\nMid:", mid, "\nHigh:", high)
+
+    
+
