@@ -35,15 +35,15 @@ def make_graph(db, cursor):
     #g.show_buttons(filter_=['physics'])
 
     # NOTE: Temporary Commented Out
-    # g.show('graph.html')
+    g.show('graph.html')
     # # open the custom PyViz graph in the default web browser
-    # webbrowser.open('file://' + os.path.abspath(os.getcwd()) + '/graph.html')
+    webbrowser.open('file://' + os.path.abspath(os.getcwd()) + '/graph.html')
 
     show_prioritize(graph)
 
 
 def sort_list(a_list):
-        return (sorted(a_list, key = lambda tup: tup[1], reverse=True)) # lambda arguments : expression
+        return (sorted(a_list, key = lambda tup: tup[1], reverse=False)) # lambda arguments : expression
 
 def show_prioritize(graph):
     # priority of tactic
@@ -59,7 +59,7 @@ def show_prioritize(graph):
                 if 'technique' in neighbor:
                     cnt_tech += 1
                 else:
-                    print(node, neighbor)
+                    #print(node, neighbor)
                     cnt_tac += 1
             match cnt_tac:
                 case 0:
