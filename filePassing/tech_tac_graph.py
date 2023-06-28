@@ -6,6 +6,9 @@ import os
 
 # method to create web browser graph
 def make_graph(db, cursor):
+    #temp
+    print('Creating a graph...')
+
     # setting up the graph
     tac_tac = db.collection('TacticTactic')
     graph = nx.Graph()
@@ -34,12 +37,12 @@ def make_graph(db, cursor):
     # this is a list of sliders that can interact with the graph, adds things like wind and gravity
     #g.show_buttons(filter_=['physics'])
 
-    # NOTE: Temporary Commented Out
-    # g.show('graph.html')
-    # # open the custom PyViz graph in the default web browser
-    # webbrowser.open('file://' + os.path.abspath(os.getcwd()) + '/graph.html')
-
     show_prioritize(graph)
+
+    # NOTE: Temporary Commented Out
+    g.show('graph.html')
+    # open the custom PyViz graph in the default web browser
+    webbrowser.open('file://' + os.path.abspath(os.getcwd()) + '/graph.html')
 
 
 def sort_list(a_list):

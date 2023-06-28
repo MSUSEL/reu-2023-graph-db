@@ -127,7 +127,7 @@ def main():
                     print('Invalid (not \'cve\'/\'cwe\') item detected from the input json file')
                     break
     except IndexError:
-        print("Usage: [file_name] [cve/cwe.json] [controls.json]")
+        print("Usage: python3 [file_name] [cve/cwe.json] [controls.json]")
 
 if __name__ == '__main__':
     main()
