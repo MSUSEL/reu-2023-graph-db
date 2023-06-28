@@ -7,6 +7,9 @@ import os
 
 # method to create web browser graph
 def make_graph(db, cursor):
+    #temp
+    print('Creating a graph...')
+
     # setting up the graph
     tac_tac = db.collection('TacticTactic')
     graph = nx.Graph()
