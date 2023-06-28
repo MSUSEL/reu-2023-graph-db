@@ -80,7 +80,7 @@ def show_prioritize(graph):
     high = sort_list(high)
 
     # determine the highest priority node and change color to red
-    #print('Low:', low, "\nMid:", mid, "\nHigh:", high)
+    print('Low:', low, "\nMid:", mid, "\nHigh:", high)
     if high.__len__() > 0 and graph.has_node(high[0][0]):
         graph.add_node(high[0][0], color='red')
     elif mid.__len__() > 0 and graph.has_node(mid[0][0]):

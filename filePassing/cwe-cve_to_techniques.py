@@ -13,6 +13,9 @@ def read_cve(data, controls):
     # stores cve(s) in the file
     cve_list = []
 
+    # temp
+    print('Reading CVEs in the input file...')
+
     # gets all the cve in the specified json file
     for obj in data:
         for cve_value in obj.values():
@@ -38,6 +41,9 @@ def read_cwe(data, controls):
     # stores cwe(s) in the file
     cwe_list = []
 
+    # temp
+    print('Reading CWEs in the input file...')
+
     # gets all the cwe in the specified json file
     for obj in data:
         for cwe_value in obj.values():
@@ -62,6 +68,9 @@ def read_cwe(data, controls):
 def find_tech_not_ctrl(controls, cursor_tech):
     # stores techniques that do not have specified controls
     tech_list = []
+
+    # temp
+    print('Finding Technique that does not have specify control...')
 
     # compare the techniques and controls
     for tech in cursor_tech:
