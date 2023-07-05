@@ -1,0 +1,6 @@
+networkx
+numpy
+python-arango
+pyvis
+arango
+
