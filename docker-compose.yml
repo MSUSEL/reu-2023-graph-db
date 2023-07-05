@@ -1,9 +1,9 @@
 version: "3.5"
 services:
-  REU-2023:
+  reu-2023:
     ports: 
       - 8560
-    container_name: REU-2023
+    container_name: reu-2023
     build:
       context: .
       dockerfile: Dockerfile
