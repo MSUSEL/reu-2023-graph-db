@@ -4,7 +4,6 @@ from pyvis import network as net
 import webbrowser
 import os
 
-
 # method to create web browser graph
 def make_graph(db, cursor):
     #temp
@@ -14,6 +13,9 @@ def make_graph(db, cursor):
     tac_tac = db.collection('TacticTactic')
     graph = nx.Graph()
     g = net.Network(height='100vh', width='100%', notebook=True)
+
+    # NOTE: Temp
+    tac_graph = nx.DiGraph()
 
     # list for easy checking later
     tactech_from_list = []
@@ -27,16 +29,76 @@ def make_graph(db, cursor):
         # adding tactic into list for easy checking
         tactech_from_list.append(key[1])
 
+    start_nodes = []
+
     # this is checking the BRON database for tactic to tactic 
     # paths that need to be placed into the networkx graph
     for tt in tac_tac:
-        if tt['_from'] in tactech_from_list and tt['_to'] in tactech_from_list:
-            graph.add_edge(tt['_from'], tt['_to'])
+        # if tt['_from'] in tactech_from_list and tt['_to'] in tactech_from_list:
+        #     graph.add_edge(tt['_from'], tt['_to'])
+        #     tac_graph.add_edge(tt['_from'], tt['_to'])
+        if tt['_to'] in tactech_from_list:
+            if tt['_from'] in tactech_from_list:
+                graph.add_edge(tt['_from'], tt['_to'])
+                tac_graph.add_edge(tt['_from'], tt['_to'])
+            else:
+                start_nodes.append(tt['_to'])
+    # print(start_nodes)
+
+    # start_node = ''
+    # for node in tac_graph:
+    #     if node in start_nodes:
+    #         start_node = node
+    #         break
 
     show_prioritize(graph)
+    #show_prioritize(tac_graph)
+
+    net_flow_graph = nx.DiGraph()
+    # net_flow_graph.add_node('source')
+    # net_flow_graph.add_node('sink')
+    SRC = 'source[s]'
+    SINK = 'sink[t]'
+
+    nodes = [[SRC]]
+    for n in tac_graph.__iter__():
+        tech = []
+        neighbors = graph.neighbors(n)
+        for node in neighbors:
+            if 'technique' in node:
+                tech.append(n.split('/')[-1] + '/' + node.split('/')[-1])
+        nodes.append(tech)
+
+    nodes.append([SINK])
+
+    # net_flow_graph.add_node(SINK)
+    for i in range(len(nodes)):
+        for j in range(len(nodes[i])):
+            net_flow_graph.add_node(nodes[i][j])
+            #net_flow_graph.add_edge()
+
+    for i in range(len(nodes)-1):
+        for j in range(len(nodes[i])):
+            if nodes[i][j] == 'source[s]':
+                capa = len(nodes[i+1])
+            else:
+                capa = len(nodes[i])
+            for k in range(len(nodes[i+1])):
+                net_flow_graph.add_edge(nodes[i][j], nodes[i+1][k], capacity=capa, title=capa)
+    print('len:', net_flow_graph.__len__())
+    #net_flow_graph.add_node(nodes[0])
+
+    # pos = nx.spring_layout(net_flow_graph)
+    # labels = nx.get_edge_attributes(net_flow_graph, 'capacity')
+    # nx.draw(net_flow_graph, pos)
+    # nx.draw_networkx_edge_labels(net_flow_graph, pos, edge_labels=labels)
+
 
     # translates networkx graph into PyViz graph
-    g.from_nx(graph)
+    g.from_nx(net_flow_graph)
+
+    #TODO: turn off the physics without clicking button
+    g.show_buttons(filter_=['physics'])
     g.show('graph.html')
     # open the custom PyViz graph in the default web browser
     webbrowser.open('file://' + os.path.abspath(os.getcwd()) + '/graph.html')
