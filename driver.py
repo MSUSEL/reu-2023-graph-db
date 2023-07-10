@@ -1,5 +1,9 @@
 from arango import ArangoClient
-import json, get_json_from_db, insert_control_data, insert_tech_ctrl_edge, insert_tactic_path
+import json
+import get_json_from_db
+import insert_control_data
+import insert_tech_ctrl_edge
+import insert_tactic_path
 import rm_dup_tac_tech
 
 # access to the arango database

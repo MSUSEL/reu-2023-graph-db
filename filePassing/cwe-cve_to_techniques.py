@@ -5,8 +5,7 @@ import tech_tac_graph
 from arango import ArangoClient
 
 # access to the arango database
-client = ArangoClient()
-db = client.db('BRON', username='root', password='changeme')
+db = ArangoClient().db('BRON', username='root', password='changeme')
 
 # reads cve in the json file and find the technique of them
 def read_cve(data, controls):
@@ -70,7 +69,7 @@ def find_tech_not_ctrl(controls, cursor_tech):
     tech_list = []
 
     # temp
-    print('Finding Technique that does not have specify control...')
+    print('Finding Technique that does not have the specified control...')
 
     # compare the techniques and controls
     for tech in cursor_tech:
