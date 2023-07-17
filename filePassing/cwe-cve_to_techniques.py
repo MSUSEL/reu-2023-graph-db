@@ -21,11 +21,22 @@ def read_cve(data, controls):
             cve_list.append(cve_value) # adds each cve to the list
 
     # finds the techniques that can result to the cve in the cve_list
-    query = 'for item in cve ' \
-        + 'filter item.original_id in @cve_list ' \
-        + 'for e, v, p in 1..5 inbound item CweCve, CapecCwe, TechniqueCapec ' \
-        + 'filter LENGTH(p.edges) > 2 ' \
-        + 'return distinct LAST(p.vertices)._id'
+    # query = 'for item in cve ' \
+    #     + 'filter item.original_id in @cve_list ' \
+    #     + 'for e, v, p in 1..5 inbound item CweCve, CapecCwe, TechniqueCapec ' \
+    #     + 'filter LENGTH(p.edges) > 2 ' \
+    #     + 'return distinct LAST(p.vertices)._id'
+
+    # finds the techniques that can result to the cve in the cve_list
+    query = 'for cve in cve '\
+        + 'filter cve.original_id in @cve_list '\
+        + 'for cwe_cve in CweCve '\
+        + 'filter cwe_cve._to == cve._id '\
+        + 'for capec_cwe in CapecCwe '\
+        + 'filter capec_cwe._to == cwe_cve._from '\
+        + 'for tc in TechniqueCapec '\
+        + 'filter tc._to == capec_cwe._from '\
+        + 'return distinct tc._from'
     
     # specify that @cve_list in the query is cve_list
     bind = {'cve_list': cve_list}
@@ -49,11 +60,20 @@ def read_cwe(data, controls):
             cwe_list.append(cwe_value) # adds each cwe to the list
 
     # finds the techniques that can result to the cwe in the cve_list
-    query = 'for item in cwe ' \
-            + 'filter item.original_id in @cwe_list ' \
-            + 'for e, v, p in 1..4 inbound item CapecCwe, TechniqueCapec ' \
-            + 'filter LENGTH(p.edges) > 1 ' \
-            + 'return distinct LAST(p.vertices)._id'
+    # query = 'for item in cwe ' \
+    #         + 'filter item.original_id in @cwe_list ' \
+    #         + 'for e, v, p in 1..4 inbound item CapecCwe, TechniqueCapec ' \
+    #         + 'filter LENGTH(p.edges) > 1 ' \
+    #         + 'return distinct LAST(p.vertices)._id'
+
+    # finds the techniques that can result to the cwe in the cve_list
+    query = 'for cwe in cwe '\
+        + 'filter cwe.original_id in @cwe_list '\
+        + 'for capec_cwe in CapecCwe '\
+        + 'filter capec_cwe._to == cwe_cve._from '\
+        + 'for tc in TechniqueCapec '\
+        + 'filter tc._to == capec_cwe._from '\
+        + 'return distinct tc._from'
     
     # specify that @cwe_list in the query is cwe_list
     bind = {'cwe_list': cwe_list}
