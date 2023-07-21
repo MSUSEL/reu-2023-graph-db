@@ -6,7 +6,7 @@ import os
 import json
 
 # method to create web browser graph
-def make_graph(db, cursor):
+def make_graph(db, cursor_tac_tec, data_list):
     #temp
     print('Creating a graph...')
 
@@ -23,14 +23,15 @@ def make_graph(db, cursor):
     tactech_from_list = []
 
     # takes the ._from ._to edge from the cursor query
-    for item in cursor:
-        key, value = item.items()
+    for item in cursor_tac_tec:
+        tac, tech = item.items()
         # adding nodes and edge into networkx graph
-        graph.add_nodes_from([key[1], value[1]])
-        graph.add_edge(key[1], value[1])
+        graph.add_nodes_from([tac[1], tech[1]])
+        graph.add_edge(tac[1], tech[1])
         # adding tactic into list for easy checking
-        tactech_from_list.append(key[1])
+        tactech_from_list.append(tac[1])
 
+        
 
     # this is checking the BRON database for tactic to tactic 
     # paths that need to be placed into the networkx graph
@@ -39,7 +40,9 @@ def make_graph(db, cursor):
             graph.add_edge(tt['_from'], tt['_to'])
             tac_graph.add_edge(tt['_from'], tt['_to'])
 
-    show_prioritize(graph) # runs algorithm that finds the prioritize paths
+    #temp
+    prioritize_lists = show_prioritize(graph) # runs algorithm that finds the prioritize paths
+    create_table(db, prioritize_lists, data_list)
 
     net_flow_graph = make_net_flow_graph(graph, tac_graph)
 
@@ -54,8 +57,8 @@ def make_graph(db, cursor):
     g2.show('network_flow.html')
 
     # open the custom PyViz graph in the default web browser
-    webbrowser.open('file://' + os.path.abspath(os.getcwd()) + '/graph.html')
-    webbrowser.open('file://' + os.path.abspath(os.getcwd()) + '/network_flow.html')
+    # webbrowser.open('file://' + os.path.abspath(os.getcwd()) + '/graph.html')
+    # webbrowser.open('file://' + os.path.abspath(os.getcwd()) + '/network_flow.html')
 
 
 # method to sort the individual priority lists
@@ -106,6 +109,46 @@ def show_prioritize(graph):
         graph.add_node(low[0][0], color='red')
     else:
         pass
+
+    #temp
+    return high + mid + low
+    # print(prioritize_lists)
+    # #create_table(prioritize_lists)
+
+
+def create_table(db, prioritize_lists, data_list):
+
+    for obj in prioritize_lists:
+        tactic_id = obj[0]
+        tac_data = {tactic_id: []}
+
+        query = 'for tac_tech in TacticTechnique '\
+            + 'filter tac_tech._from == @tac_id '\
+            + 'return distinct tac_tech._to'
+        
+        bind_var = {'tac_id': tactic_id}
+        cursor = db.aql.execute(query, bind_vars=bind_var)
+
+        for tech_id in cursor:
+            for data in data_list:
+                if tech_id == data['Technique ID']:
+                    tac_data[tactic_id].append(data)
+        
+
+
+        # for data1 in cursor:
+        #     tech_id = data1['tech_id']
+        #     for data2 in tech_vul:
+        #         #tech_id2 = data[0]
+        #         if tech_id == data2[0]:
+        #             vul = 'CWE'
+        #             if 'CVE' in data2[1][0]:
+        #                 vul = 'CVE'
+        #             dicti = {vul: data2[1],'Technique ID': tech_id, 'Technique Name': data1['tech_name']} 
+        #             dicti = dicti | {'Control ID': data1['control_id'], 'Control Name': data1['control_name']}
+        #             print(dicti)
+        #             tac_dict[tactic_id].append(dicti)
+
 
 
 # creates a network flow graph
