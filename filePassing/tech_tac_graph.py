@@ -4,6 +4,7 @@ from pyvis import network as net
 import webbrowser
 import os
 import json
+import json2table
 
 # method to create web browser graph
 def make_graph(db, cursor_tac_tec, data_list):
@@ -40,7 +41,6 @@ def make_graph(db, cursor_tac_tec, data_list):
             graph.add_edge(tt['_from'], tt['_to'])
             tac_graph.add_edge(tt['_from'], tt['_to'])
 
-    #temp
     prioritize_lists = show_prioritize(graph) # runs algorithm that finds the prioritize paths
     create_table(db, prioritize_lists, data_list)
 
@@ -110,17 +110,16 @@ def show_prioritize(graph):
     else:
         pass
 
-    #temp
     return high + mid + low
-    # print(prioritize_lists)
-    # #create_table(prioritize_lists)
 
 
+# creates a html table that contains data related to the generated graphs
 def create_table(db, prioritize_lists, data_list):
+    table_list = [] # will contains data for each table
 
+    # loop to find the technique that map to the specific tactic
     for obj in prioritize_lists:
         tactic_id = obj[0]
-        tac_data = {tactic_id: []}
 
         query = 'for tac_tech in TacticTechnique '\
             + 'filter tac_tech._from == @tac_id '\
@@ -132,22 +131,24 @@ def create_table(db, prioritize_lists, data_list):
         for tech_id in cursor:
             for data in data_list:
                 if tech_id == data['Technique ID']:
-                    tac_data[tactic_id].append(data)
-        
+                    table_list.append({tactic_id:data})
+                    break
 
-
-        # for data1 in cursor:
-        #     tech_id = data1['tech_id']
-        #     for data2 in tech_vul:
-        #         #tech_id2 = data[0]
-        #         if tech_id == data2[0]:
-        #             vul = 'CWE'
-        #             if 'CVE' in data2[1][0]:
-        #                 vul = 'CVE'
-        #             dicti = {vul: data2[1],'Technique ID': tech_id, 'Technique Name': data1['tech_name']} 
-        #             dicti = dicti | {'Control ID': data1['control_id'], 'Control Name': data1['control_name']}
-        #             print(dicti)
-        #             tac_dict[tactic_id].append(dicti)
+    # creates and adds the json objects to the file
+    with open('needed_controls.json', 'w') as out_file:
+        json.dump(table_list, out_file, indent=2)
+    
+    # NOTE: won't generate a table for tactic that does not map to any technique
+    # generates a html table from the json file
+    with open('needed_controls.json', 'r') as out_file:
+        json_objects = json.load(out_file)
+        with open('control_table.html', 'w') as control_html:
+            for obj in json_objects:
+                build_direction = "LEFT_TO_RIGHT"
+                table_attributes = {"align" : "center", "border": 1}
+                html = json2table.convert(obj, build_direction=build_direction, 
+                                          table_attributes=table_attributes)
+                control_html.write(html)
 
 
 

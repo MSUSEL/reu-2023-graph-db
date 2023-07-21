@@ -2,7 +2,7 @@ import json
 import os.path
 import sys
 import tech_tac_graph
-from arango import ArangoClient, CursorNextError
+from arango import ArangoClient
 
 # access to the arango database
 db = ArangoClient().db('BRON', username='root', password='changeme')
@@ -97,117 +97,54 @@ def find_tech_not_ctrl(controls, cursor_tech):
     tech_vul_list = []
 
     # compare the techniques and controls
-    cnt = 0
-    try:
-        tech_ctrl = db.collection('TechniqueControl')
-        for vul_tech in cursor_tech:
-            #print(vul_tech)
-            #print("REsult", vul_tech['cve'])
-            #tech_vul
-            cnt+=1
-            ctrl_list = [] # stores control that map to the specific technique
-            tech_vul = list(vul_tech.values())
-            tech_id = tech_vul[0]
-            if tech_id not in tech_list:
-                for data in tech_ctrl:
-                    if data['_from'] == tech_id:
-                        ctrl_list.append(data['_to'])
+    tech_ctrl = db.collection('TechniqueControl')
+    for vul_tech in cursor_tech:
+        ctrl_list = [] # stores control that map to the specific technique
+        tech_vul = list(vul_tech.values())
+        tech_id = tech_vul[0]
+        if tech_id not in tech_list:
+            for data in tech_ctrl:
+                if data['_from'] == tech_id:
+                    ctrl_list.append(data['_to'])
 
-                # indicates whether control is in the list
-                in_list = False
-                for a_ctrl in controls:
-                    for  ctrl_value in a_ctrl.values():
-                        control = 'control/' + str(ctrl_value)
-                        if control in ctrl_list:
-                            in_list = True
-                            break
-                if not in_list:
-                    tech_list.append(tech_id)
-                    tech_vul_list.append(tech_vul)
-    except CursorNextError:
-        print(cnt)
+            # indicates whether control is in the list
+            in_list = False
+            for a_ctrl in controls:
+                for  ctrl_value in a_ctrl.values():
+                    control = 'control/' + str(ctrl_value)
+                    if control in ctrl_list:
+                        in_list = True
+                        break
+            if not in_list:
+                tech_list.append(tech_id)
+                tech_vul_list.append(tech_vul)
     
-    print('passed')
-
-    # for tech in cursor_tech:
-    #     tech_ctrl = db.collection('TechniqueControl')
-    #     ctrl_list = [] # stores control that map to the specific technique
-    #     for data in tech_ctrl:
-    #         if data['_from'] == tech:
-    #             ctrl_list.append(data['_to'])
-
-    #     # indicates whether control is in the list
-    #     in_list = False
-    #     for a_ctrl in controls:
-    #         for  ctrl_value in a_ctrl.values():
-    #             control = 'control/' + str(ctrl_value)
-    #             if control in ctrl_list:
-    #                 in_list = True
-    #                 break
-    #     if not in_list:
-    #         tech_list.append(tech)
-
-    #temp
-    # query = 'for tech in technique '\
-    #     + 'filter tech._id in @tech_list '\
-    #     + 'for tech_ctrl in TechniqueControl '\
-    #     + 'filter tech_ctrl._from == tech._id '\
-    #     + 'for ctrl in control '\
-    #     + 'filter ctrl._id == tech_ctrl._to '\
-    #     + 'return distinct {Technique_ID: tech._id, Technique_Name: tech.name, Control_ID: tech_ctrl._to, Control_Name: ctrl.name}'
-    
-    # bind_var = {'tech_list': tech_list}
-    # # execute the query
-    # cursor_tech_ctrl = db.aql.execute(query, bind_vars=bind_var)
-    # #create_control_json(cursor_tech_ctrl)
-
-    #temp
-    # tech_ctrl_list = []
-    # tech_ctrl_obj = []
-    # for obj in cursor_tech_ctrl:
-    #     tech_ctrl_obj.append(list(obj.values())[0])
-    #     tech_ctrl_obj.append(obj)
-
-    #     tech_ctrl_list.append(obj)
-    # print(tech_ctrl_list[0].values())
-
-    #+ 'collect tech_id=tech._id, tech_name=tech.name into ctrl_id=tech_ctrl._to '\
-    #+ 'return distinct {tech_id: tech_id, tech_name: tech_name, control_id: unique(ctrl_id)}'
-    #+ 'return distinct {tech_id: tech._id, tech_name: tech.name, control_id: ctrl._id, control_name: ctrl.name}'
-    # + 'collect tech_id=tech._id, tech_name=tech.name into ctrl '\
-    # + 'return distinct {tech_id: tech_id, tech_name: tech_name, control_id: unique(ctrl.), control_name: unique(ctrl_name)}'
-
+    # query to get the data for html table
     query = 'for tech in technique '\
             + 'filter tech._id in @tech_list '\
             + 'for tech_ctrl in TechniqueControl '\
             + 'filter tech_ctrl._from == tech._id '\
             + 'for ctrl in control '\
             + 'filter ctrl._id == tech_ctrl._to '\
-            + 'return distinct {tech_id: tech._id, tech_name: tech.name, ctrl_id: ctrl._id, ctrl_name: ctrl.name}'
+            + 'collect tech_id=tech._id, tech_name=tech.name into ctrl=ctrl.id_name '\
+            + 'return distinct {tech_id: tech_id, tech_name: tech_name, ctrl: unique(ctrl)}'
     
     bind_var = {'tech_list': tech_list}
     cursor = db.aql.execute(query, bind_vars=bind_var)
 
     data_list = []
 
+    # matches the cve data and data that we got from the previous query
     for data in cursor:
         tech_id = data['tech_id']
         for tech_vul_d in tech_vul_list:
-            print(tech_vul_d)
             if tech_id == tech_vul_d[0]:
                 vul = 'cwe'
                 if 'cve' in tech_vul_d[1][0].lower():
                         vul = 'cve'
                 table_d = {vul: tech_vul_d[1],'Technique ID': tech_id, 'Technique Name': data['tech_name']} 
-                table_d = table_d | {'Control ID': data['ctrl_id'], 'Control Name': data['ctrl_name']}
+                table_d = table_d | {'Control (Name)': data['ctrl']}
                 data_list.append(table_d)
-
-    # cnt = 0
-    # for data in table_data:
-    #     print(data)
-    #     cnt += 1
-    # print(cnt)
-    # exit(1)
 
     # finds the paths between the techniques we got and tactics
     query = 'for item in @tech_list ' \
