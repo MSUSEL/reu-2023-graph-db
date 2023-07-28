@@ -141,9 +141,21 @@ def find_tech_not_ctrl(controls, cursor_tech):
     bind_vars = {'tech_list': tech_list}
     cursor_tac_tec = db.aql.execute(query, bind_vars=bind_vars)
 
+    # NOTE: need if statement??
+    user_tac = 'TA0001' #temp
+    query = 'for tac in tactic '\
+        + 'filter tac.original_id == @user_tac '\
+        + 'return tac._id'
+    
+    bind_vars = {'user_tac': user_tac}
+    cursor_tac = db.aql.execute(query, bind_vars=bind_vars)
+    for tac_id in cursor_tac:
+        user_tac_id = tac_id
+        print(user_tac_id)
+
     # calls function to make a graph
     #TODO: write a AQL that finds tha tactic id from the id that user entered
-    tech_tac_graph.make_graph(db, cursor_tac_tec, data_list, 'tactic/tactic_00004')
+    tech_tac_graph.make_graph(db, cursor_tac_tec, data_list, user_tac_id)
 
 
 def main():
