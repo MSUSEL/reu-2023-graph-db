@@ -6,6 +6,7 @@ import os
 import json
 import json2table
 
+
 # method to create web browser graph
 def make_graph(db, cursor_tac_tec, data_list):
     #temp
@@ -131,7 +132,15 @@ def create_table(db, prioritize_lists, data_list):
         for tech_id in cursor:
             for data in data_list:
                 if tech_id == data['Technique ID']:
-                    table_list.append({tactic_id:data})
+                    query = 'for tac in tactic '\
+                    + 'filter tac._id == @tactic_id '\
+                    + 'return tac.name'
+                
+                    bind_var = {'tactic_id': tactic_id}
+                    cursor_tac = db.aql.execute(query, bind_vars=bind_var)
+                    
+                    tactic = tactic_id + ' (' + next(cursor_tac) + ')'
+                    table_list.append({tactic:data})
                     break
 
     # creates and adds the json objects to the file
@@ -143,9 +152,22 @@ def create_table(db, prioritize_lists, data_list):
     with open('needed_controls.json', 'r') as out_file:
         json_objects = json.load(out_file)
         with open('control_table.html', 'w') as control_html:
+            
+            table_detail = '<ul><li>Code analysis has revealed that the system has the '\
+                        + 'vulnerabilities identified by their CVE ids.</li><li>Each vulnerability'\
+                        + ' found is followed by the attack technique that can be used to exploit '\
+                        + 'that vulnerability.</li><li>The attack stage id that an adversary could'\
+                        + ' achieve by exploiting the vulnerability with the attack technique is '\
+                        + 'given below.</li><li>Also shown are the set of security controls '\
+                        + 'suggested to mitigate the system\'s exposure to the specified attack '\
+                        + 'technique.</li></ul>'
+            
+            control_html.write('<h1>Table</h1><div>' + table_detail + '</div><style>h1 '
+                               + '{text-align: center;} div {text-align: center;} ul {display: '
+                               + 'inline-block; text-align: left;}</style>')
             for obj in json_objects:
                 build_direction = "LEFT_TO_RIGHT"
-                table_attributes = {"align" : "center", "border": 1}
+                table_attributes = {"width": 100, "align": "center", "border": 1}
                 html = json2table.convert(obj, build_direction=build_direction, 
                                           table_attributes=table_attributes)
                 control_html.write(html)

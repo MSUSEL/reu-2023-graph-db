@@ -28,7 +28,6 @@ def read_cve(data, controls):
     #     + 'return distinct LAST(p.vertices)._id'
 
     # finds the techniques that can result to the cve in the cve_list
-    #NOTE: not right???
     query = 'for cve in cve '\
         + 'filter cve.original_id in @cve_list '\
         + 'for cwe_cve in CweCve '\
@@ -82,7 +81,7 @@ def read_cwe(data, controls):
     bind = {'cwe_list': cwe_list}
 
     # execute the query
-    cursor = db.aql.execute(query, bind_vars=bind)
+    cursor = db.aql.execute(query, bind_vars=bind, ttl=300)
     find_tech_not_ctrl(controls, cursor)
 
 
@@ -91,10 +90,10 @@ def find_tech_not_ctrl(controls, cursor_tech):
     # stores techniques that do not have specified controls
     tech_list = []
 
+    tech_vul_list = []
+
     # temp
     print('Finding Technique that does not have the specified control...')
-
-    tech_vul_list = []
 
     # compare the techniques and controls
     tech_ctrl = db.collection('TechniqueControl')
@@ -130,7 +129,7 @@ def find_tech_not_ctrl(controls, cursor_tech):
             + 'return distinct {tech_id: tech_id, tech_name: tech_name, ctrl: unique(ctrl)}'
     
     bind_var = {'tech_list': tech_list}
-    cursor = db.aql.execute(query, bind_vars=bind_var)
+    cursor = db.aql.execute(query, bind_vars=bind_var, ttl=300)
 
     data_list = []
 
