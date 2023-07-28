@@ -21,13 +21,6 @@ def read_cve(data, controls):
             cve_list.append(cve_value) # adds each cve to the list
 
     # finds the techniques that can result to the cve in the cve_list
-    # query = 'for item in cve ' \
-    #     + 'filter item.original_id in @cve_list ' \
-    #     + 'for e, v, p in 1..5 inbound item CweCve, CapecCwe, TechniqueCapec ' \
-    #     + 'filter LENGTH(p.edges) > 2 ' \
-    #     + 'return distinct LAST(p.vertices)._id'
-
-    # finds the techniques that can result to the cve in the cve_list
     query = 'for cve in cve '\
         + 'filter cve.original_id in @cve_list '\
         + 'for cwe_cve in CweCve '\
@@ -60,13 +53,6 @@ def read_cwe(data, controls):
     for obj in data:
         for cwe_value in obj.values():
             cwe_list.append(cwe_value) # adds each cwe to the list
-
-    # finds the techniques that can result to the cwe in the cve_list
-    # query = 'for item in cwe ' \
-    #         + 'filter item.original_id in @cwe_list ' \
-    #         + 'for e, v, p in 1..4 inbound item CapecCwe, TechniqueCapec ' \
-    #         + 'filter LENGTH(p.edges) > 1 ' \
-    #         + 'return distinct LAST(p.vertices)._id'
 
     # finds the techniques that can result to the cwe in the cve_list
     query = 'for cwe in cwe '\
@@ -156,7 +142,8 @@ def find_tech_not_ctrl(controls, cursor_tech):
     cursor_tac_tec = db.aql.execute(query, bind_vars=bind_vars)
 
     # calls function to make a graph
-    tech_tac_graph.make_graph(db, cursor_tac_tec, data_list)
+    #TODO: write a AQL that finds tha tactic id from the id that user entered
+    tech_tac_graph.make_graph(db, cursor_tac_tec, data_list, 'tactic/tactic_00004')
 
 
 def main():

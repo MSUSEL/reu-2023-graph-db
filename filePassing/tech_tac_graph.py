@@ -8,7 +8,7 @@ import json2table
 
 
 # method to create web browser graph
-def make_graph(db, cursor_tac_tec, data_list):
+def make_graph(db, cursor_tac_tec, data_list, user_tac):
     #temp
     print('Creating a graph...')
 
@@ -41,8 +41,13 @@ def make_graph(db, cursor_tac_tec, data_list):
         if tt['_from'] in tactech_from_list and tt['_to'] in tactech_from_list:
             graph.add_edge(tt['_from'], tt['_to'])
             tac_graph.add_edge(tt['_from'], tt['_to'])
+    
+    # checks whether the tactic specified by the user is in the graph
+    user_pri = None
+    if user_tac in tactech_from_list:
+        user_pri = user_tac
 
-    prioritize_lists = show_prioritize(graph) # runs algorithm that finds the prioritize paths
+    prioritize_lists = show_prioritize(graph,user_pri) # runs algorithm that finds the prioritize paths
     create_table(db, prioritize_lists, data_list)
 
     net_flow_graph = make_net_flow_graph(graph, tac_graph)
@@ -68,11 +73,12 @@ def sort_list(a_list):
 
 
 # finds priority of tactic
-def show_prioritize(graph):
+def show_prioritize(graph, user_pri):
     # priority of tactic
     high = []
     mid = []
     low = []
+
     # iterate over every node in the graph
     for node in graph.__iter__():
         # if its a tactic node
@@ -80,21 +86,26 @@ def show_prioritize(graph):
             # start the edge type counters
             cnt_tac = 0
             cnt_tech = 0
-            for neighbor in graph.neighbors(node):
-                if 'technique' in neighbor:
-                    # add a technique edge
-                    cnt_tech += 1
-                else:
-                    # add a tactic edge
-                    cnt_tac += 1
-            # sort the nodes into high, mid, and low priority based on tactic to tactic connectivity
-            match cnt_tac:
-                case 0:
-                    low.append((node, cnt_tech))
-                case 1:
-                    mid.append((node, cnt_tech))
-                case _:
-                    high.append((node, cnt_tech))
+
+            # if the tactic is the one that user specified make it the most prioritize node
+            if user_pri != None and user_pri in node:
+                high.append((node, 0))
+            else:
+                for neighbor in graph.neighbors(node):
+                    if 'technique' in neighbor:
+                        # add a technique edge
+                        cnt_tech += 1
+                    else:
+                        # add a tactic edge
+                        cnt_tac += 1
+                # sort the nodes into high, mid, and low priority based on tactic to tactic connectivity
+                match cnt_tac:
+                    case 0:
+                        low.append((node, cnt_tech))
+                    case 1:
+                        mid.append((node, cnt_tech))
+                    case _:
+                        high.append((node, cnt_tech))
     # sort the individual lists
     low = sort_list(low)
     mid = sort_list(mid)
@@ -147,7 +158,7 @@ def create_table(db, prioritize_lists, data_list):
     with open('needed_controls.json', 'w') as out_file:
         json.dump(table_list, out_file, indent=2)
     
-    # NOTE: won't generate a table for tactic that does not map to any technique
+    # NOTE: won't generate a table for tactic that does not map to any technique with controls
     # generates a html table from the json file
     with open('needed_controls.json', 'r') as out_file:
         json_objects = json.load(out_file)
